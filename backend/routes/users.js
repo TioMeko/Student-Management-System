@@ -5,7 +5,7 @@ import pool from '../config/connection.js'
 
 const router = Router();
 
-// POST /api/users - Create a new student
+// POST /api/users - Create a new user
 router.post('/', async (req, res) => {
     const { username, password } = req.body;
     const hashedPassword = await hash(password, 10);
@@ -24,12 +24,12 @@ router.get('/', async (req, res) => {
         const [users] = await pool.query('SELECT id, username FROM users');
         res.send(users);
     } catch (error) {s
-        console.error('Error retrieving users:', error); // It's often helpful to log the full error for debugging
+        console.error('Error retrieving users:', error);
         res.status(500).send({ message: 'Error retrieving users', error: error.message });
     }
 });
 
-// GET /api/users/:id - Get a single student by ID
+// GET /api/users/:id - Get a single user by ID
 router.get('/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -44,12 +44,11 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// PUT /api/users/:id - Update a student
+// PUT /api/users/:id - Update a user
 router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const { username, password } = req.body;
     
-    // Initialize an array to hold SQL parts and parameter values
     let sqlParts = [];
     let values = [];
 
@@ -63,14 +62,12 @@ router.put('/:id', async (req, res) => {
         values.push(hashedPassword);
     }
 
-    // If no fields are provided, return an error
     if (values.length === 0) {
         return res.status(400).send({ message: 'No valid fields provided for update' });
     }
 
-    // Join the parts to form the full SQL command
     let sql = 'UPDATE users SET ' + sqlParts.join(', ') + ' WHERE id = ?';
-    values.push(id); // Add the ID to the values array for the WHERE clause
+    values.push(id);
 
     try {
         const [result] = await pool.query(sql, values);
