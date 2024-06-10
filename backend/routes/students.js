@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { hash } from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import pool from '../config/connection.js'
 
@@ -23,7 +22,7 @@ router.get('/', async (req, res) => {
         const [students] = await pool.query('SELECT id, name, email FROM students');
         res.send(students);
     } catch (error) {s
-        console.error('Error retrieving students:', error); // It's often helpful to log the full error for debugging
+        console.error('Error retrieving students:', error);
         res.status(500).send({ message: 'Error retrieving students', error: error.message });
     }
 });
@@ -47,8 +46,7 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const { name, email, age } = req.body;
-    
-    // Initialize an array to hold SQL parts and parameter values
+
     let sqlParts = [];
     let values = [];
 
@@ -65,14 +63,13 @@ router.put('/:id', async (req, res) => {
         values.push(age);
     }
 
-    // If no fields are provided, return an error
     if (values.length === 0) {
         return res.status(400).send({ message: 'No valid fields provided for update' });
     }
 
     // Join the parts to form the full SQL command
     let sql = 'UPDATE students SET ' + sqlParts.join(', ') + ' WHERE id = ?';
-    values.push(id); // Add the ID to the values array for the WHERE clause
+    values.push(id);
 
     try {
         const [result] = await pool.query(sql, values);
