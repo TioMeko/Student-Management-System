@@ -143,46 +143,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// GET /students/:id/classes - Get a student and their classes
-router.get('/:id/classes', async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const [results] = await pool.query(
-      `
-            SELECT s.id AS student_id, s.name AS student_name, s.email, s.age, c.id AS class_id, c.name AS class_name
-            FROM students s
-            JOIN student_classes sc ON s.id = sc.student_id
-            JOIN classes c ON sc.class_id = c.id
-            WHERE s.id = ?
-        `,
-      [id]
-    );
-
-    if (results.length > 0) {
-      const studentInfo = {
-        id: results[0].student_id,
-        name: results[0].student_name,
-        email: results[0].email,
-        age: results[0].age,
-        classes: results.map((row) => ({
-          id: row.class_id,
-          name: row.class_name,
-        })),
-      };
-      res.send(studentInfo);
-    } else {
-      res.status(404).send({ message: 'Student not found' });
-    }
-  } catch (error) {
-    console.error('Error fetching student and classes:', error);
-    res
-      .status(500)
-      .send({
-        message: 'Error retrieving student and classes',
-        error: error.message,
-      });
-  }
-});
-
 export default router;
